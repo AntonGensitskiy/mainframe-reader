@@ -366,13 +366,6 @@ public class MainframeReaderTest extends HydratorTestBase {
   }
 
   @Test
-  public void testDefaults() {
-    MainframeSource.MainframeSourceConfig mainframeSourceConfig = new MainframeSource.MainframeSourceConfig();
-    Assert.assertEquals(Long.toString(MainframeSource.DEFAULT_MAX_SPLIT_SIZE_IN_MB * 1024 * 1024),
-                        mainframeSourceConfig.getMaxSplitSize().toString());
-  }
-
-  @Test
   public void testDataTypes() throws Exception {
 
     String copybookContents = "000100*                                                                         \n" +
@@ -441,7 +434,7 @@ public class MainframeReaderTest extends HydratorTestBase {
     StructuredRecord record = output.get(0);
 
     Assert.assertEquals("1", record.get("DTAR020_KEYCODE"));
-    Assert.assertEquals(123, (long) record.get("DTAR020_NUM_RIGHTJUSTIFIED"));
+    Assert.assertEquals(123, (int) record.get("DTAR020_NUM_RIGHTJUSTIFIED"));
     Assert.assertEquals(20L, (long) record.get("DTAR020_STORE_NO"));
     Assert.assertEquals(20140202, (Double) record.get("DTAR020_DATE"), 0);
     Assert.assertEquals(100L, (long) record.get("DTAR020_DEPT_NO"));
@@ -486,42 +479,6 @@ public class MainframeReaderTest extends HydratorTestBase {
       throw new IllegalArgumentException("Invalid copybook contents: " + e.getMessage(), e);
     } catch (IOException e) {
       throw new IllegalArgumentException("Error creating binary test file: " + e.getMessage(), e);
-    }
-  }
-
-  @Test
-  public void testConfig() {
-    MainframeSource.MainframeSourceConfig config = new MainframeSource.MainframeSourceConfig();
-    Assert.assertEquals(MainframeSource.MainframeSourceConfig.DEFAULT_FONT, config.getFont());
-    config.charset = "EBCDIC-International";
-    Assert.assertEquals("cp500", config.getFont());
-    config.codepage = "cp297";
-    Assert.assertEquals("cp297", config.getFont());
-    config.charset = null;
-    Assert.assertEquals("cp297", config.getFont());
-
-    config.copybookContents = COPYBOOK_CONTENTS;
-    Assert.assertEquals(COPYBOOK_CONTENTS, config.getCopyBookContents());
-
-    config.copybookContents = COPYBOOK_WITH_REPLACEMENTS;
-    config.replacements = ":PREFIX:=DTAR020, :COMP:=COMP-3";
-    Assert.assertEquals(ImmutableMap.of(":PREFIX:", "DTAR020", ":COMP:", "COMP-3"), config.getReplacements());
-    Assert.assertEquals(COPYBOOK_CONTENTS, config.getCopyBookContents());
-
-    config.replacements = "a=b,c";
-    try {
-      config.getReplacements();
-      Assert.fail("expected illegal argument");
-    } catch (IllegalArgumentException e) {
-      // expected
-    }
-
-    config.replacements = ":PREFIX:=DTAR020ANDSOMEMORELENGHTYTEXT, :COMP:=COMP-3";
-    try {
-      config.getCopyBookContents();
-      Assert.fail("expected illegal argument");
-    } catch (IllegalArgumentException e) {
-      // expected
     }
   }
 }
